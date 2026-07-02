@@ -42,8 +42,13 @@ else
         --exclude=.git --exclude=build -C "$REPO_DIR" .
 fi
 
-rpmbuild -bs "$SPEC" \
-    --define "_topdir $TOPDIR" \
-    --define "otel_version $VERSION"
+# Bake the version into the spec that goes into the SRPM. COPR rebuilds the
+# SRPM's embedded spec per-chroot without our defines, so the version must be
+# a literal in the spec, not a --define.
+BUILD_SPEC="$TOPDIR/SPECS/opentelemetry.spec"
+cp "$SPEC" "$BUILD_SPEC"
+sed -i "s/^%global otel_version .*/%global otel_version ${VERSION}/" "$BUILD_SPEC"
+
+rpmbuild -bs "$BUILD_SPEC" --define "_topdir $TOPDIR"
 
 cp -v "$TOPDIR"/SRPMS/*.src.rpm "$OUTDIR/"

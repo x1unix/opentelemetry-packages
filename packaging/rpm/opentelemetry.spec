@@ -16,11 +16,13 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 %global _build_id_links none
-# %install sources a bash library (common.sh) -- needs bash, not /bin/sh.
+# The %%install section sources a bash library (common.sh) -- needs bash, not /bin/sh.
 %global _buildshell /bin/bash
 
-# Version is injected by .copr/Makefile / make-srpm.sh via --define "otel_version X".
-%{!?otel_version: %global otel_version 0.0.0}
+# otel_version is substituted in place by packaging/rpm/make-srpm.sh at SRPM
+# build time, so the literal version travels inside the SRPM's spec (COPR
+# rebuilds that spec per-chroot WITHOUT any --define we pass here).
+%global otel_version 0.0.0
 
 Name:           opentelemetry
 Version:        %{otel_version}
