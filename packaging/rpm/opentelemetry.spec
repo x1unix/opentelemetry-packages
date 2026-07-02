@@ -16,6 +16,11 @@
 %global debug_package %{nil}
 %global __strip /bin/true
 %global _build_id_links none
+# The .NET agent bundles a musl-linked flavor alongside the glibc one. RPM's
+# automatic dependency generator scans those ELFs and adds an unsatisfiable
+# Requires: libc.musl-x86_64.so.1 on glibc hosts. Drop musl-libc auto-requires
+# (only the dotnet subpackage ships musl content, so a build-wide filter is safe).
+%global __requires_exclude ^libc\\.musl
 # The %%install section sources a bash library (common.sh) -- needs bash, not /bin/sh.
 %global _buildshell /bin/bash
 
