@@ -46,9 +46,7 @@ BuildRequires:  npm
 Requires:       opentelemetry-injector = %{version}-%{release}
 Requires:       opentelemetry-java-autoinstrumentation = %{version}-%{release}
 Requires:       opentelemetry-nodejs-autoinstrumentation = %{version}-%{release}
-%ifarch x86_64
 Requires:       opentelemetry-dotnet-autoinstrumentation = %{version}-%{release}
-%endif
 
 %description
 Metapackage that installs the OpenTelemetry LD_PRELOAD injector together with
@@ -92,9 +90,8 @@ OpenTelemetry Node.js auto-instrumentation (@opentelemetry/auto-instrumentations
 and the injector drop-in configuration that enables it.
 
 #---------------------------------------------------------------------
-# opentelemetry-dotnet-autoinstrumentation (x86_64 only)
+# opentelemetry-dotnet-autoinstrumentation (x86_64 + aarch64)
 #---------------------------------------------------------------------
-%ifarch x86_64
 %package -n opentelemetry-dotnet-autoinstrumentation
 Summary:        OpenTelemetry .NET Auto-Instrumentation
 Requires:       opentelemetry-injector >= %{version}
@@ -102,7 +99,6 @@ Requires:       opentelemetry-injector >= %{version}
 %description -n opentelemetry-dotnet-autoinstrumentation
 OpenTelemetry .NET auto-instrumentation agent (glibc and musl flavors) and the
 injector drop-in configuration that enables it.
-%endif
 
 #=====================================================================
 %prep
@@ -183,22 +179,20 @@ install -m 0644 "$COMMON_DIR/nodejs/README.md" "${br}${DOC_DIR}/opentelemetry-no
 install -d -m 0755 "${br}${LICENSE_DIR}/opentelemetry-nodejs-autoinstrumentation"
 install -m 0644 LICENSE "${br}${LICENSE_DIR}/opentelemetry-nodejs-autoinstrumentation/"
 
-# ---- dotnet (x86_64 only) ------------------------------------------
-if [[ "%{_arch}" == "x86_64" ]]; then
-    dotnet_tag="$(tail -n 1 "$DOTNET_AGENT_RELEASE_PATH")"
-    install -d -m 0755 "${br}${DOTNET_INSTALL_DIR}"
-    download_dotnet_agent "$dotnet_tag" "${br}${DOTNET_INSTALL_DIR}"
-    chmod -R u+rwX,go+rX "${br}${DOTNET_INSTALL_DIR}"
-    install -d -m 0755 "${br}${DOTNET_CONFIG_DIR}"
-    install -m 0644 "$COMMON_DIR/dotnet/otel-config.yaml" "${br}${DOTNET_CONFIG_DIR}/"
-    install -m 0644 "$COMMON_DIR/dotnet/injector.conf" "${br}${INJECTOR_CONFIG_DIR}/conf.d/dotnet.conf"
-    generate_man_page "$COMMON_DIR/dotnet/opentelemetry-dotnet.1.tmpl" \
-        "${br}${MAN_DIR}/man1/opentelemetry-dotnet.1.gz" "%{version}"
-    install -d -m 0755 "${br}${DOC_DIR}/opentelemetry-dotnet-autoinstrumentation"
-    install -m 0644 "$COMMON_DIR/dotnet/README.md" "${br}${DOC_DIR}/opentelemetry-dotnet-autoinstrumentation/"
-    install -d -m 0755 "${br}${LICENSE_DIR}/opentelemetry-dotnet-autoinstrumentation"
-    install -m 0644 LICENSE "${br}${LICENSE_DIR}/opentelemetry-dotnet-autoinstrumentation/"
-fi
+# ---- dotnet (x86_64 + aarch64) -------------------------------------
+dotnet_tag="$(tail -n 1 "$DOTNET_AGENT_RELEASE_PATH")"
+install -d -m 0755 "${br}${DOTNET_INSTALL_DIR}"
+download_dotnet_agent "$dotnet_tag" "${br}${DOTNET_INSTALL_DIR}"
+chmod -R u+rwX,go+rX "${br}${DOTNET_INSTALL_DIR}"
+install -d -m 0755 "${br}${DOTNET_CONFIG_DIR}"
+install -m 0644 "$COMMON_DIR/dotnet/otel-config.yaml" "${br}${DOTNET_CONFIG_DIR}/"
+install -m 0644 "$COMMON_DIR/dotnet/injector.conf" "${br}${INJECTOR_CONFIG_DIR}/conf.d/dotnet.conf"
+generate_man_page "$COMMON_DIR/dotnet/opentelemetry-dotnet.1.tmpl" \
+    "${br}${MAN_DIR}/man1/opentelemetry-dotnet.1.gz" "%{version}"
+install -d -m 0755 "${br}${DOC_DIR}/opentelemetry-dotnet-autoinstrumentation"
+install -m 0644 "$COMMON_DIR/dotnet/README.md" "${br}${DOC_DIR}/opentelemetry-dotnet-autoinstrumentation/"
+install -d -m 0755 "${br}${LICENSE_DIR}/opentelemetry-dotnet-autoinstrumentation"
+install -m 0644 LICENSE "${br}${LICENSE_DIR}/opentelemetry-dotnet-autoinstrumentation/"
 
 # ---- meta ----------------------------------------------------------
 install -d -m 0755 "${br}${DOC_DIR}/opentelemetry"
@@ -264,7 +258,6 @@ fi
 %config(noreplace) /etc/opentelemetry/injector/conf.d/nodejs.conf
 %{_mandir}/man1/opentelemetry-nodejs.1.gz
 
-%ifarch x86_64
 %files -n opentelemetry-dotnet-autoinstrumentation
 %license /usr/share/licenses/opentelemetry-dotnet-autoinstrumentation/LICENSE
 %doc /usr/share/doc/opentelemetry-dotnet-autoinstrumentation/README.md
@@ -273,7 +266,6 @@ fi
 %config(noreplace) /etc/opentelemetry/dotnet/otel-config.yaml
 %config(noreplace) /etc/opentelemetry/injector/conf.d/dotnet.conf
 %{_mandir}/man1/opentelemetry-dotnet.1.gz
-%endif
 
 %changelog
 * Thu Jul 02 2026 OpenTelemetry <opentelemetry> - %{version}-%{release}
